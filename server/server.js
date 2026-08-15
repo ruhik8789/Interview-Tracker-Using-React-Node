@@ -2,6 +2,9 @@ const express = require('express');
 
 const app = express();
 
+// if a request body is sent in JSON format, this middleware will parse it and make it available in req.body
+app.use(express.json());
+
 const PORT = 5000;
 
 const interviews = [
@@ -33,6 +36,21 @@ app.get('/api/interviews/:id', (req, res) => {
     }
 
     res.json(interview);
+});
+
+app.post('/api/interviews', (req, res) => {
+    const { company, role, status } = req.body;
+
+    const newInterview = {
+        id: interviews.length + 1,
+        company,
+        role,
+        status
+    };
+
+    interviews.push(newInterview);
+
+    res.status(201).json(newInterview);
 });
 
 app.listen(PORT, () => {

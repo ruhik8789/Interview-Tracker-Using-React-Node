@@ -7,7 +7,7 @@ app.use(express.json());
 
 const PORT = 5000;
 
-const interviews = [
+let interviews = [
     {
         id: 1,
         company: "Google",
@@ -53,6 +53,38 @@ app.post('/api/interviews', (req, res) => {
     res.status(201).json(newInterview);
 });
 
+app.put('/api/interviews/:id', (req, res) => {
+    const interviewId = Number(req.params.id);
+
+    const interview = interviews.find(i => i.id === interviewId);
+
+    if(!interview) {
+        return res.status(404).json({ message: "Interview not found" });
+    }
+
+    const { company, role, status } = req.body;
+
+    interview.company = company;
+    interview.role = role;
+    interview.status = status;
+
+    res.status(200).json(interview);
+});
+
+app.delete('/api/interviews/:id', (req, res) => {
+    const interviewId = Number(req.params.id);
+
+    const interviewIndex = interviews.findIndex(i => i.id === interviewId);
+
+    if(interviewIndex === -1) {
+        return res.status(404).json({ message: "Interview not found" });
+    }
+
+    interviews = interviews.filter(i => i.id !== interviewId);
+
+    res.status(204).send();
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-})
+});

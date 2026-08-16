@@ -1,6 +1,10 @@
 const express = require('express');
+const cors = require('cors');
 
 const app = express();
+
+// cors() is a middleware that allows cross-origin requests. This is useful when your frontend and backend are hosted on different ports ot domains.
+app.use(cors());
 
 // if a request body is sent in JSON format, this middleware will parse it and make it available in req.body
 app.use(express.json());

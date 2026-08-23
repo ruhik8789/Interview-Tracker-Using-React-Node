@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import type { Interview } from './types/interview';
 import { getInterviews } from './services/interviewService';
+import AddInterviewForm from './components/AddInterviewForm';
 
 function App() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const loadInterviews = async () => {
@@ -32,7 +34,9 @@ function App() {
             Keep track of your applications, interviews and offers.
           </p>
         </div>
-        <button className="add-button">
+        <button 
+        className="add-button" 
+        onClick={() => setShowForm(true)}>
           + Add Interview
         </button>
       </header>
@@ -105,6 +109,17 @@ function App() {
           )}
         </section>
       </main>
+
+      {showForm && (
+        <AddInterviewForm onInterviewAdded={(newInterview) => {
+          setInterviews((previous) => [
+            newInterview,
+            ...previous
+          ]);
+        }}
+        onClose={() => setShowForm(false)}
+        />
+      )}
     </div>
   )
 }

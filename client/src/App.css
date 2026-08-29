@@ -198,6 +198,20 @@
   color: #f87171;
 }
 
+.empty-state {
+  padding: 20px;
+}
+
+.empty-state-title {
+  color: #f5f7fb;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.empty-state .primary-button {
+  margin-top: 8px;
+}
+
 .loader {
   width: 28px;
   height: 28px;
@@ -314,6 +328,26 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
+.form-group input:disabled,
+.form-group select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-group input.has-error {
+  border-color: #f87171;
+}
+
+.form-group input.has-error:focus {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.14);
+}
+
+.field-error {
+  margin: 6px 0 0;
+  color: #f87171;
+  font-size: 12px;
+}
+
 .form-error {
   margin: 4px 0 18px;
   color: #f87171;
@@ -354,4 +388,43 @@
 .primary-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.interview-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #2b3040;
+  border-radius: 9px;
+  background: transparent;
+  color: #9ba3b5;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.icon-button:hover {
+  background: #202532;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.delete-button:hover {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.08);
+  color: #f87171;
+}
+
+@media (max-width: 700px) {
+  .interview-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }

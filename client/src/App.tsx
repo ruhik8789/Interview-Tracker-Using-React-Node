@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import type { Interview } from './types/interview';
-import { getInterviews } from './services/interviewService';
-import AddInterviewForm from './components/AddInterviewForm';
+import { deleteInterview, getInterviews } from './services/interviewService';
+import InterviewForm from './components/InterviewForm';
 
 function App() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [editingInterview, setEditingInterview] = useState<Interview | null>(null);
 
   useEffect(() => {
     const loadInterviews = async () => {
@@ -24,6 +25,42 @@ function App() {
     loadInterviews();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this interview?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteInterview(id);
+
+      setInterviews((previous) => previous.filter(interview => interview.id !== id));
+    } catch {
+      setError("Unable to delete the interview.")
+    }
+  };
+
+  const handleInterviewSaved = (savedInterview: Interview) => {
+    setInterviews((previous) => {
+      const exists = previous.some(
+        (interview) => interview.id === savedInterview.id,
+      );
+
+      if (exists) {
+        return previous.map((interview) =>
+          interview.id === savedInterview.id ? savedInterview : interview,
+        );
+      }
+
+      return [savedInterview, ...previous];
+    });
+
+    setEditingInterview(null);
+  };
+
   return (
     <div className="app">
       <header className="header">
@@ -34,9 +71,7 @@ function App() {
             Keep track of your applications, interviews and offers.
           </p>
         </div>
-        <button 
-        className="add-button" 
-        onClick={() => setShowForm(true)}>
+        <button className="add-button" onClick={() => setShowForm(true)}>
           + Add Interview
         </button>
       </header>
@@ -51,18 +86,21 @@ function App() {
           <div className="stat-card">
             <span>Interviews</span>
             <strong>
-              {interviews.filter(
-                (interview) => interview.status === "Interview"
-              ).length}
+              {
+                interviews.filter(
+                  (interview) => interview.status === "Interview",
+                ).length
+              }
             </strong>
           </div>
 
           <div className="stat-card">
             <span>Offers</span>
             <strong>
-              {interviews.filter(
-                (interview) => interview.status === "Offer"
-              ).length}
+              {
+                interviews.filter((interview) => interview.status === "Offer")
+                  .length
+              }
             </strong>
           </div>
         </section>
@@ -77,9 +115,8 @@ function App() {
 
           {loading && (
             <div className="state">
-              <div className="loader">
-                <p>Loading interviews...</p>
-              </div>
+              <div className="loader" />
+              <p>Loading interviews...</p>
             </div>
           )}
 
@@ -89,7 +126,21 @@ function App() {
             </div>
           )}
 
-          {!loading && !error && (
+          {!loading && !error && interviews.length === 0 && (
+            <div className="state empty-state">
+              <p className="empty-state-title">No applications yet</p>
+              <p>Add your first application to start tracking it here.</p>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => setShowForm(true)}
+              >
+                + Add Interview
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && interviews.length > 0 && (
             <div className="interview-list">
               {interviews.map((interview) => (
                 <div className="interview-card" key={interview.id}>
@@ -102,7 +153,29 @@ function App() {
                     <p>{interview.role}</p>
                   </div>
 
-                  <span className={`status status-${interview.status.toLowerCase()}`}>{interview.status}</span>
+                  <div className="interview-actions">
+                    <span
+                      className={`status status-${interview.status.toLowerCase()}`}
+                    >
+                      {interview.status}
+                    </span>
+
+                    <button
+                      className="icon-button"
+                      onClick={() => setEditingInterview(interview)}
+                      aria-label={`Edit ${interview.company}`}
+                    >
+                      ✎
+                    </button>
+
+                    <button
+                      className="icon-button delete-button"
+                      onClick={() => handleDelete(interview.id)}
+                      aria-label={`Delete ${interview.company}`}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -111,17 +184,21 @@ function App() {
       </main>
 
       {showForm && (
-        <AddInterviewForm onInterviewAdded={(newInterview) => {
-          setInterviews((previous) => [
-            newInterview,
-            ...previous
-          ]);
-        }}
-        onClose={() => setShowForm(false)}
+        <InterviewForm
+          onInterviewSaved={handleInterviewSaved}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+
+      {editingInterview && (
+        <InterviewForm
+          interview={editingInterview}
+          onInterviewSaved={handleInterviewSaved}
+          onClose={() => setEditingInterview(null)}
         />
       )}
     </div>
-  )
+  );
 }
 
 export default App

@@ -12,13 +12,13 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-pool.query("SELECT * FROM interviews")
-    .then((result) => {
-        console.log("Database connected:", result.rows[0]);
-    })
-    .catch((error) => {
-        console.error("Database connection failed:", error);
-    });
+// pool.query("SELECT * FROM interviews")
+//     .then((result) => {
+//         console.log("Database connected:", result.rows[0]);
+//     })
+//     .catch((error) => {
+//         console.error("Database connection failed:", error);
+//     });
 
 // Our API should only accept these four values
 const ALLOWED_STATUSES = [
@@ -28,20 +28,20 @@ const ALLOWED_STATUSES = [
     "Rejected"
 ];
 
-let interviews = [
-    {
-        id: 1,
-        company: "Google",
-        role: "Frontend Developer",
-        status: "Interview"
-    },
-    {
-        id: 2,
-        company: "Facebook",
-        role: "Backend Developer",
-        status: "Offer"
-    }
-];
+// let interviews = [
+//     {
+//         id: 1,
+//         company: "Google",
+//         role: "Frontend Developer",
+//         status: "Interview"
+//     },
+//     {
+//         id: 2,
+//         company: "Facebook",
+//         role: "Backend Developer",
+//         status: "Offer"
+//     }
+// ];
 
 const validateInterview = ({ company, role, status }) => {
     if (!company?.trim()) {
@@ -112,18 +112,18 @@ app.post('/api/interviews', async (req, res) => {
 
     try {
         const result = await pool.query(
-            "INSERT INTO interviews (company, role, status) VALUES ($1, $2, $3) RETURNING *",
+            `INSERT INTO interviews (company, role, status) VALUES ($1, $2, $3) RETURNING *`, 
             [company.trim(), role.trim(), status]
         );
-
+        console.log("result", result);
+        console.log("result.rows", result.rows);
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error("Failed to create interview:", error);
 
         res.status(500).json({
-            message: "Failed to create interview",
-            error: error.message
-        });
+            message: "Failed to create interview"
+        })
     }
 });
 

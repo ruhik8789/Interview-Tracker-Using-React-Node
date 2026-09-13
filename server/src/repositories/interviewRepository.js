@@ -16,7 +16,52 @@ const getInterviewById = async (id) => {
     return result.rows[0];
 }
 
+const createInterview = async ({ company, role, status }) => {
+    const result = await pool.query(
+        `INSERT INTO interviews (company, role, status) 
+        VALUES ($1, $2, $3) 
+        RETURNING *
+        `, 
+        [company, role, status]
+    );
+
+    return result.rows[0];
+}
+
+const updateInterview = async (id, { company, role, status }) => {
+    const result = await pool.query(
+        `UPDATE interviews 
+        SET 
+        company = $1,
+        role = $2,
+        status = $3,
+        updated_at = CURRENT_TIMESTAMP
+        WHERE id = $4
+        RETURNING *
+        `,
+        [company, role, status, id]
+    );
+
+    return result.rows[0];
+}
+
+const deleteInterview = async (id) => {
+    const result = await pool.query(
+        `
+        DELETE FROM interviews 
+        WHERE id = $1 
+        RETURNING id
+        `,
+        [id]
+    );
+
+    return result.rows[0];
+};
+
 module.exports = {
     getAllInterviews,
     getInterviewById,
+    createInterview,
+    updateInterview,
+    deleteInterview
 };

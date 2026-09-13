@@ -6,4 +6,6 @@ const interviewController = require('../controllers/interviewController');
 
 router.get("/", interviewController.getAllInterviews);
 
+router.get("/:id", interviewController.getInterviewById);
+
 module.exports = router;

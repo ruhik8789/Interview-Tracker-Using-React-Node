@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import type { Interview } from './types/interview';
-import { deleteInterview, getInterviews } from './services/interviewService';
+import { deleteInterview, getInterviewById, getInterviews } from './services/interviewService';
 import InterviewForm from './components/InterviewForm';
 
 function App() {
@@ -24,6 +24,15 @@ function App() {
     }
     loadInterviews();
   }, []);
+
+  const handleEdit = async (id: number) => {
+    try {
+      const interview = await getInterviewById(id);
+      setEditingInterview(interview);
+    } catch {
+      setError("Unable to load the interview.");
+    }
+  };
 
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm(
@@ -162,7 +171,7 @@ function App() {
 
                     <button
                       className="icon-button"
-                      onClick={() => setEditingInterview(interview)}
+                      onClick={() => handleEdit(interview.id)}
                       aria-label={`Edit ${interview.company}`}
                     >
                       ✎

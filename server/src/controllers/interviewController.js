@@ -10,8 +10,33 @@ const getAllInterviews = async (req, res, next) => {
     }
 };
 
+const getInterviewById = async (req, res, next) => {
+    try {
+        const interviewId = Number(req.params.id);
+
+        if(!Number.isInteger(interviewId)) {
+            return res.status(400).json({
+                message: "Invalid interview ID."
+            });
+        }
+
+        const interview = await interviewService.getInterviewById(interviewId);
+
+        if(!interview) {
+            return res.status(404).json({
+                message: "Interview not found."
+            });
+        }
+
+        res.status(200).json(interview);
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getAllInterviews,
+    getInterviewById,
 };
 
 // Controller deals with 

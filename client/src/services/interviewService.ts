@@ -16,6 +16,17 @@ export const getInterviews = async (): Promise<Interview[]> => {
     return data;
 }
 
+// To get a single interview by id
+export const getInterviewById = async (id: number): Promise<Interview> => {
+    const response = await fetch(`${API_URL}/${id}`);
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch interview');
+    }
+
+    return response.json();
+}
+
 // To create or add new interview
 export const createInterview = async (interview: CreateInterviewPayload): Promise<Interview> => {
     const response = await fetch(API_URL, {

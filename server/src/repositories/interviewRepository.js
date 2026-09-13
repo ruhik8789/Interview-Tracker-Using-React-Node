@@ -8,6 +8,15 @@ const getAllInterviews = async () => {
     return result.rows;
 };
 
+const getInterviewById = async (id) => {
+    const result = await pool.query(
+        `SELECT * FROM interviews WHERE id = $1`, [id]
+    );
+
+    return result.rows[0];
+}
+
 module.exports = {
     getAllInterviews,
+    getInterviewById,
 };

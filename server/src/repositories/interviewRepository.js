@@ -1,5 +1,13 @@
 const pool = require("../config/database");
 
+const getInterviewCount = async () => {
+    const result = await pool.query(
+        `SELECT COUNT(*) FROM interviews`
+    );
+
+    return Number(result.rows[0].count);
+}
+
 const getAllInterviews = async ({ limit, offset }) => {
     const result = await pool.query(
         `SELECT * FROM interviews 
@@ -68,5 +76,6 @@ module.exports = {
     getInterviewById,
     createInterview,
     updateInterview,
-    deleteInterview
+    deleteInterview,
+    getInterviewCount
 };

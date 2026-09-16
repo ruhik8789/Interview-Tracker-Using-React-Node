@@ -1,5 +1,9 @@
 const interviewRepository = require('../repositories/interviewRepository');
 
+const getInterviewCount = async () => {
+    return await interviewRepository.getInterviewCount();
+}
+
 const getAllInterviews = async ({ limit, offset }) => {
     return await interviewRepository.getAllInterviews({ limit, offset });
 };
@@ -25,5 +29,6 @@ module.exports = {
     getInterviewById,
     createInterview,
     updateInterview,
-    deleteInterview
+    deleteInterview,
+    getInterviewCount
 };

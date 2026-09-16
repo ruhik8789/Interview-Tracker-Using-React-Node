@@ -7,9 +7,21 @@ const getAllInterviews = async (req, res, next) => {
         const limit = Number(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        const interviews = await interviewService.getAllInterviews({ limit, offset });
+        const [interviews, total] = await Promise.all([
+            interviewService.getAllInterviews({ limit, offset }),
+            interviewService.getInterviewCount()
+        ]);
+        const totalPages = Math.ceil(total / limit);
 
-        res.json(interviews);
+        res.json({
+            data: interviews,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            },
+        });
     } catch (error) {
         next(error);
     }

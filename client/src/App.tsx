@@ -1,27 +1,34 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import type { Interview } from './types/interview';
-import { deleteInterview, getInterviewById, getInterviews } from './services/interviewService';
-import InterviewForm from './components/InterviewForm';
+import { useEffect, useState } from "react";
+import "./App.css";
+import type { Interview } from "./types/interview";
+import {
+  deleteInterview,
+  getInterviewById,
+  getInterviews,
+} from "./services/interviewService";
+import InterviewForm from "./components/InterviewForm";
 
 function App() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingInterview, setEditingInterview] = useState<Interview | null>(null);
+  const [editingInterview, setEditingInterview] = useState<Interview | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadInterviews = async () => {
       try {
-        const data = await getInterviews();
-        setInterviews(data);
+        const data: any = await getInterviews();
+        const interviewsData = data.data;
+        setInterviews(interviewsData);
       } catch (error) {
         setError("Unable to load interviews.");
       } finally {
         setLoading(false);
       }
-    }
+    };
     loadInterviews();
   }, []);
 
@@ -46,9 +53,11 @@ function App() {
     try {
       await deleteInterview(id);
 
-      setInterviews((previous) => previous.filter(interview => interview.id !== id));
+      setInterviews((previous) =>
+        previous.filter((interview) => interview.id !== id),
+      );
     } catch {
-      setError("Unable to delete the interview.")
+      setError("Unable to delete the interview.");
     }
   };
 
@@ -210,4 +219,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

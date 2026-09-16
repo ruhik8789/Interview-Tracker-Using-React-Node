@@ -1,8 +1,13 @@
 const pool = require("../config/database");
 
-const getAllInterviews = async () => {
+const getAllInterviews = async ({ limit, offset }) => {
     const result = await pool.query(
-        `SELECT * FROM interviews ORDER BY created_at DESC`
+        `SELECT * FROM interviews 
+        ORDER BY created_at DESC
+        LIMIT $1
+        OFFSET $2
+        `,
+        [limit, offset]
     );
     
     return result.rows;

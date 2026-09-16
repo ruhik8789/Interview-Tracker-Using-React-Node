@@ -1,7 +1,7 @@
 const interviewRepository = require('../repositories/interviewRepository');
 
-const getAllInterviews = async () => {
-    return await interviewRepository.getAllInterviews();
+const getAllInterviews = async ({ limit, offset }) => {
+    return await interviewRepository.getAllInterviews({ limit, offset });
 };
 
 const getInterviewById = async (id) => {

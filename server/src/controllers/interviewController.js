@@ -3,7 +3,11 @@ const interviewValidator = require('../validators/interviewValidator');
 
 const getAllInterviews = async (req, res, next) => {
     try {
-        const interviews = await interviewService.getAllInterviews();
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const interviews = await interviewService.getAllInterviews({ limit, offset });
 
         res.json(interviews);
     } catch (error) {

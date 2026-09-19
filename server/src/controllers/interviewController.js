@@ -1,5 +1,6 @@
 const interviewService = require('../services/interviewService');
 const interviewValidator = require('../validators/interviewValidator');
+const { ALLOWED_SORT_FIELDS, ALLOWED_SORT_ORDERS} = require("../validators/interviewValidator");
 
 const getAllInterviews = async (req, res, next) => {
     try {
@@ -7,10 +8,24 @@ const getAllInterviews = async (req, res, next) => {
         const limit = Number(req.query.limit) || 10;
         const status = req.query.status;
         const search = req.query.search?.trim();
+        const sortBy = req.query.sortBy || "created_at";
+        const order = req.query.order || "desc";
         const offset = (page - 1) * limit;
 
+        if(!ALLOWED_SORT_FIELDS[sortBy]) {
+            return res.status(400).json({
+                message: "Invalid sort field",
+            });
+        }
+
+        if(!ALLOWED_SORT_ORDERS.includes(order)) {
+            return res.status(400).json({
+                message: "Invalid sort order",
+            })
+        }
+
         const [interviews, total] = await Promise.all([
-            interviewService.getAllInterviews({ limit, offset, status, search }),
+            interviewService.getAllInterviews({ limit, offset, status, search, sortBy, order }),
             interviewService.getInterviewCount({ status, search })
         ]);
         const totalPages = Math.ceil(total / limit);

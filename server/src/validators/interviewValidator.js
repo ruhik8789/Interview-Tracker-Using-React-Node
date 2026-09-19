@@ -21,7 +21,18 @@ const validateInterview = ({ company, role, status }) => {
     return null;
 }
 
+const ALLOWED_SORT_FIELDS = {
+    created_at: "created_at",
+    company: "company",
+    role: "role",
+    status: "status",
+};
+
+const ALLOWED_SORT_ORDERS = ["asc", "desc"];
+
 module.exports = {
     validateInterview,
     ALLOWED_STATUSES,
+    ALLOWED_SORT_FIELDS,
+    ALLOWED_SORT_ORDERS
 };

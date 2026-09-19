@@ -5,11 +5,13 @@ const getAllInterviews = async (req, res, next) => {
     try {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
+        const status = req.query.status;
+        const search = req.query.search?.trim();
         const offset = (page - 1) * limit;
 
         const [interviews, total] = await Promise.all([
-            interviewService.getAllInterviews({ limit, offset }),
-            interviewService.getInterviewCount()
+            interviewService.getAllInterviews({ limit, offset, status, search }),
+            interviewService.getInterviewCount({ status, search })
         ]);
         const totalPages = Math.ceil(total / limit);
 

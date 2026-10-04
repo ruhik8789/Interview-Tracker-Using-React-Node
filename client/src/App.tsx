@@ -10,6 +10,13 @@ import InterviewForm from "./components/InterviewForm";
 
 function App() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [limit] = useState<number>(10);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
+  const [search, setSearch] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("created_at");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -20,9 +27,21 @@ function App() {
   useEffect(() => {
     const loadInterviews = async () => {
       try {
-        const data: any = await getInterviews();
-        const interviewsData = data.data;
-        setInterviews(interviewsData);
+        setLoading(true);
+        setError("");
+
+        const response = await getInterviews({ 
+          page,
+          limit,
+          status: selectedStatus,
+          search,
+          sortBy,
+          order: "desc"
+        });
+
+        setInterviews(response.data);
+        setTotalPages(response.pagination.totalPages);
+        setTotal(response.pagination.total);
       } catch (error) {
         setError("Unable to load interviews.");
       } finally {
@@ -30,7 +49,7 @@ function App() {
       }
     };
     loadInterviews();
-  }, []);
+  }, [page, limit, selectedStatus, search, sortBy]);
 
   const handleEdit = async (id: number) => {
     try {
@@ -98,28 +117,17 @@ function App() {
         <section className="stats-grid">
           <div className="stat-card">
             <span>Total Applications</span>
-            <strong>{interviews.length}</strong>
+            <strong>{total}</strong>
           </div>
 
           <div className="stat-card">
-            <span>Interviews</span>
-            <strong>
-              {
-                interviews.filter(
-                  (interview) => interview.status === "Interview",
-                ).length
-              }
-            </strong>
+            <span>Current Page</span>
+            <strong>{page}</strong>
           </div>
 
           <div className="stat-card">
-            <span>Offers</span>
-            <strong>
-              {
-                interviews.filter((interview) => interview.status === "Offer")
-                  .length
-              }
-            </strong>
+            <span>Total Pages</span>
+            <strong>{totalPages}</strong>
           </div>
         </section>
 
@@ -128,6 +136,51 @@ function App() {
             <div>
               <h2>Recent Interviews</h2>
               <p>Your latest application activity</p>
+            </div>
+
+            <div className="toolbar">
+              <div className="search-box">
+                <span className="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  placeholder="Search company or role..."
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setPage(1);
+                  }}
+                />
+              </div>
+
+              <select
+                className="filter-select"
+                value={selectedStatus}
+                onChange={(event) => {
+                  setSelectedStatus(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All Status</option>
+                <option value="Applied">Applied</option>
+                <option value="Interview">Interview</option>
+                <option value="Offer">Offer</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+
+              <select
+                className="filter-select"
+                value={sortBy}
+                onChange={(event) => {
+                  setSortBy(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="created_at">Recently Added</option>
+                <option value="company">Company</option>
+                <option value="role">Role</option>
+                <option value="status">Status</option>
+              </select>
             </div>
           </div>
 
@@ -196,6 +249,53 @@ function App() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {!loading && !error && totalPages > 0 && (
+            <div className="pagination-wrapper">
+              <div className="pagination-summary">
+                Showing{" "}
+                <strong>{total === 0 ? 0 : (page - 1) * limit + 1}</strong> –{" "}
+                <strong>{Math.min(page * limit, total)}</strong> of{" "}
+                <strong>{total}</strong>
+              </div>
+
+              <div className="pagination">
+                <button
+                  type="button"
+                  className="pagination-button"
+                  disabled={page === 1}
+                  onClick={() => setPage((currentPage) => currentPage - 1)}
+                >
+                  ←
+                </button>
+
+                {Array.from({ length: totalPages }, (_, index) => {
+                  const pageNumber = index + 1;
+
+                  return (
+                    <button
+                      type="button"
+                      key={pageNumber}
+                      className={`pagination-button ${
+                        page === pageNumber ? "active" : ""
+                      }`}
+                      onClick={() => setPage(pageNumber)}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  className="pagination-button"
+                  disabled={page === totalPages}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                >
+                  →
+                </button>
+              </div>
             </div>
           )}
         </section>

@@ -1,17 +1,49 @@
 import type {Interview} from '../types/interview';
+import type {InterviewResponse} from '../types/interview';
 import type {CreateInterviewPayload} from '../types/createInterview';
 
 const API_URL = "http://localhost:5000/api/interviews";
 
+export interface GetInterviewsParams {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+    sortBy?: string;
+    order?: "asc" | "desc";
+}
+
 // To get all the interviews
-export const getInterviews = async (): Promise<Interview[]> => {
-    const response = await fetch(API_URL);
+export const getInterviews = async ({
+    page = 1,
+    limit = 10,
+    status,
+    search,
+    sortBy = "created_at",
+    order = "desc"
+}: GetInterviewsParams = {}): Promise<InterviewResponse> => {
+    const queryParams = new URLSearchParams();
+
+    queryParams.set("page", page.toString());
+    queryParams.set("limit", limit.toString());
+    queryParams.set("sortBy", sortBy);
+    queryParams.set("order", order);
+
+    if (status) {
+        queryParams.set("status", status);
+    }
+
+    if (search) {
+        queryParams.set("search", search);
+    }
+
+    const response = await fetch(`${API_URL}?${queryParams.toString()}`);
 
     if (!response.ok) {
         throw new Error('Failed to fetch interviews');
     }
 
-    const data: Interview[] = await response.json();
+    const data: InterviewResponse = await response.json();
 
     return data;
 }

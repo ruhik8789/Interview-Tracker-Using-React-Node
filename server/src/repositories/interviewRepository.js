@@ -29,7 +29,7 @@ const getInterviewCount = async ({ status, search }) => {
     ${whereClause}
     `
 
-    const result = await query.pool(query, values);
+    const result = await pool.query(query, values);
 
     return Number(result.rows[0].count);
 }

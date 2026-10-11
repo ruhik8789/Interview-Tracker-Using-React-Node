@@ -7,6 +7,9 @@ import {
   getInterviews,
 } from "./services/interviewService";
 import InterviewForm from "./components/InterviewForm";
+import useDebounce from "./hooks/useDebounce";
+import InterviewList from "./components/InterviewList";
+import InterviewFilters from "./components/InterviewFilters";
 
 function App() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
@@ -17,6 +20,7 @@ function App() {
   const [search, setSearch] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("created_at");
+  const debouncedSearch = useDebounce(search, 300);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -30,13 +34,13 @@ function App() {
         setLoading(true);
         setError("");
 
-        const response = await getInterviews({ 
+        const response = await getInterviews({
           page,
           limit,
           status: selectedStatus,
-          search,
+          search: debouncedSearch,
           sortBy,
-          order: "desc"
+          order: "desc",
         });
 
         setInterviews(response.data);
@@ -49,7 +53,7 @@ function App() {
       }
     };
     loadInterviews();
-  }, [page, limit, selectedStatus, search, sortBy]);
+  }, [page, limit, selectedStatus, debouncedSearch, sortBy]);
 
   const handleEdit = async (id: number) => {
     try {
@@ -138,50 +142,23 @@ function App() {
               <p>Your latest application activity</p>
             </div>
 
-            <div className="toolbar">
-              <div className="search-box">
-                <span className="search-icon">⌕</span>
-
-                <input
-                  type="text"
-                  placeholder="Search company or role..."
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                />
-              </div>
-
-              <select
-                className="filter-select"
-                value={selectedStatus}
-                onChange={(event) => {
-                  setSelectedStatus(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All Status</option>
-                <option value="Applied">Applied</option>
-                <option value="Interview">Interview</option>
-                <option value="Offer">Offer</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-
-              <select
-                className="filter-select"
-                value={sortBy}
-                onChange={(event) => {
-                  setSortBy(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="created_at">Recently Added</option>
-                <option value="company">Company</option>
-                <option value="role">Role</option>
-                <option value="status">Status</option>
-              </select>
-            </div>
+            <InterviewFilters
+              search={search}
+              selectedStatus={selectedStatus}
+              sortBy={sortBy}
+              onSearchChange={(value) => {
+                setSearch(value);
+                setPage(1);
+              }}
+              onStatusChange={(value) => {
+                setSelectedStatus(value);
+                setPage(1);
+              }}
+              onSortChange={(value) => {
+                setSortBy(value);
+                setPage(1);
+              }}
+            />
           </div>
 
           {loading && (
@@ -212,44 +189,11 @@ function App() {
           )}
 
           {!loading && !error && interviews.length > 0 && (
-            <div className="interview-list">
-              {interviews.map((interview) => (
-                <div className="interview-card" key={interview.id}>
-                  <div className="company-icon">
-                    {interview.company.charAt(0)}
-                  </div>
-
-                  <div className="interview-info">
-                    <h3>{interview.company}</h3>
-                    <p>{interview.role}</p>
-                  </div>
-
-                  <div className="interview-actions">
-                    <span
-                      className={`status status-${interview.status.toLowerCase()}`}
-                    >
-                      {interview.status}
-                    </span>
-
-                    <button
-                      className="icon-button"
-                      onClick={() => handleEdit(interview.id)}
-                      aria-label={`Edit ${interview.company}`}
-                    >
-                      ✎
-                    </button>
-
-                    <button
-                      className="icon-button delete-button"
-                      onClick={() => handleDelete(interview.id)}
-                      aria-label={`Delete ${interview.company}`}
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <InterviewList
+              interviews={interviews}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           )}
           {!loading && !error && totalPages > 0 && (
             <div className="pagination-wrapper">

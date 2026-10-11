@@ -10,6 +10,7 @@ import InterviewForm from "./components/InterviewForm";
 import useDebounce from "./hooks/useDebounce";
 import InterviewList from "./components/InterviewList";
 import InterviewFilters from "./components/InterviewFilters";
+import Pagination from "./components/Pagination";
 
 function App() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
@@ -27,6 +28,7 @@ function App() {
   const [editingInterview, setEditingInterview] = useState<Interview | null>(
     null,
   );
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const loadInterviews = async () => {
@@ -53,7 +55,7 @@ function App() {
       }
     };
     loadInterviews();
-  }, [page, limit, selectedStatus, debouncedSearch, sortBy]);
+  }, [page, limit, selectedStatus, debouncedSearch, sortBy, refreshKey]);
 
   const handleEdit = async (id: number) => {
     try {
@@ -79,6 +81,7 @@ function App() {
       setInterviews((previous) =>
         previous.filter((interview) => interview.id !== id),
       );
+      setRefreshKey((current) => current + 1);
     } catch {
       setError("Unable to delete the interview.");
     }
@@ -99,7 +102,9 @@ function App() {
       return [savedInterview, ...previous];
     });
 
+    setShowForm(false);
     setEditingInterview(null);
+    setRefreshKey((current) => current + 1);
   };
 
   return (
@@ -196,51 +201,13 @@ function App() {
             />
           )}
           {!loading && !error && totalPages > 0 && (
-            <div className="pagination-wrapper">
-              <div className="pagination-summary">
-                Showing{" "}
-                <strong>{total === 0 ? 0 : (page - 1) * limit + 1}</strong> –{" "}
-                <strong>{Math.min(page * limit, total)}</strong> of{" "}
-                <strong>{total}</strong>
-              </div>
-
-              <div className="pagination">
-                <button
-                  type="button"
-                  className="pagination-button"
-                  disabled={page === 1}
-                  onClick={() => setPage((currentPage) => currentPage - 1)}
-                >
-                  ←
-                </button>
-
-                {Array.from({ length: totalPages }, (_, index) => {
-                  const pageNumber = index + 1;
-
-                  return (
-                    <button
-                      type="button"
-                      key={pageNumber}
-                      className={`pagination-button ${
-                        page === pageNumber ? "active" : ""
-                      }`}
-                      onClick={() => setPage(pageNumber)}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                })}
-
-                <button
-                  type="button"
-                  className="pagination-button"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((currentPage) => currentPage + 1)}
-                >
-                  →
-                </button>
-              </div>
-            </div>
+            <Pagination
+              page={page}
+              limit={limit}
+              total={total}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           )}
         </section>
       </main>
